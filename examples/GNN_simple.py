@@ -1,5 +1,12 @@
 import tensorflow as tf
+# import tensorflow.compat.v1 as tf    # unable import
+# tf.disable_v2_behavior()
 import numpy as np
+
+import sys,os
+# sys.path.append("/yiyuan/data/home/wanghuozhu/ws/other/gnn-hz/gnn/")
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import gnn.gnn_utils as gnn_utils
 import gnn.GNN as GNN
 import Net_Simple as n
@@ -13,7 +20,10 @@ import matplotlib.pyplot as plt
 import os
 
 os.environ['CUDA_VISIBLE_DEVICES'] = "0"
-config = tf.ConfigProto()
+# config = tf.ConfigProto()
+# https://blog.csdn.net/u012388993/article/details/102573008
+config = tf.compat.v1.ConfigProto()
+
 config.gpu_options.allow_growth = True
 
 ############# data creation ################
@@ -99,12 +109,17 @@ labels = np.eye(max(labels)+1, dtype=np.int32)[labels]  # one-hot encoding of la
 threshold = 0.01
 learning_rate = 0.01
 state_dim = 5
-tf.reset_default_graph()
+# tf.reset_default_graph() 
+# https://stackoverflow.com/questions/40782271/attributeerror-module-tensorflow-has-no-attribute-reset-default-graph
+tf.compat.v1.reset_default_graph()
 input_dim = inp.shape[1]
 output_dim = labels.shape[1]
 max_it = 50
-num_epoch = 10000
-optimizer = tf.train.AdamOptimizer
+# num_epoch = 10000
+num_epoch = 1000
+
+# optimizer = tf.train.AdamOptimizer
+optimizer = tf.keras.optimizers.Adam
 
 # initialize state and output network
 net = n.Net(input_dim, state_dim, output_dim)
@@ -128,7 +143,7 @@ for j in range(0, num_epoch):
 
     if count % 30 == 0:
         print("Epoch ", count)
-        print("Training: ", g.Validate(inp, arcnode, labels, count))
+        print("Training: ", g.Validate(inp, arcnode, labels, count)) # loss_val, metr, loop[1]
 
         # end = time.time()
         # print("Epoch {} at time {}".format(j, end-start))

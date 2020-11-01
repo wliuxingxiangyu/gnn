@@ -1,6 +1,6 @@
 import tensorflow as tf
-physical_devices = tf.config.list_physical_devices('GPU') 
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+# physical_devices = tf.config.list_physical_devices('GPU') 
+# tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 import numpy as np
 import gnn.gnn_utils as gnn_utils
@@ -178,9 +178,12 @@ class Net(tf.keras.Model):
 
         self.k = tf.Variable(0,name='k')
         
-        self.state = tf.Variable(state_init, name="state",dtype=tf.float32)
+        # self.state = tf.Variable(state_init, name="state",dtype=tf.float32) # hz-  where is state_init defined ?
 
-        self.state_old = tf.Variable(state_init, name="old_state",dtype=tf.float32)
+        # self.state_old = tf.Variable(state_init, name="old_state",dtype=tf.float32)
+        self.state = tf.Variable(0, name="state",dtype=tf.float32) # hz-
+
+        self.state_old = tf.Variable(0, name="old_state",dtype=tf.float32)
         
         self.layer_1_state = tf.keras.layers.Dense(self.state_l1, activation='tanh')
         self.layer_2_state = tf.keras.layers.Dense(self.state_l2, activation='tanh')
@@ -218,7 +221,9 @@ class Net(tf.keras.Model):
         # evaluate condition on the convergence of the state
 
         # evaluate distance by state(t) and state(t-1)
-        outDistance = tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(state, old_state)), 1) + 0.00000000001)
+        print("hz- (state-old_state): " + str(state-old_state)) # str(state-old_state)=Tensor("net/while/sub:0", shape=(), dtype=float32)
+        outDistance = tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(state, old_state)), 1) + 0.00000000001) #hz-
+
         # vector showing item converged or not (given a certain threshold)
         checkDistanceVec = tf.greater(outDistance, self.state_threshold)
 
@@ -272,7 +277,7 @@ def create_model():
 
     return model
 	
-model = create_model()
+model = create_model() # hz- main()
 
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 for _ in range(10):
